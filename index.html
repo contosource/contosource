@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ContoSource — Connection to Source</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- PRESENCE GATE -->
+  <div id="presenceGate" aria-live="polite" role="region">
+    <div id="fieldLayer" class="layer">
+      <div id="darkVoid" class="stage"></div>
+      <div id="sourcePoint" class="stage" aria-hidden="true"></div>
+      <div id="breathRing" class="stage" aria-hidden="true"></div>
+      <div id="whisper" class="stage" aria-hidden="true">
+        <p class="line line-1">Be here.</p>
+        <p class="line line-2">You are safe.</p>
+      </div>
+      <div id="portal" class="stage" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- HOME (hidden until gate completes) -->
+  <main id="home" class="hidden" role="main" aria-hidden="true">
+    <header class="home-header">
+      <h1>ContoSource</h1>
+      <p class="sub">Connection to Source — breathe. return. remember.</p>
+      <button id="beginBtn" class="btn">Begin Alignment</button>
+    </header>
+  </main>
+
+  <audio id="tone" crossorigin="anonymous" preload="auto">
+    <!-- safe, royalty-free sine-ish tone hosted public (fallback); you can replace later -->
+    <source src="https://cdn.jsdelivr.net/gh/jackd248/sine-tones@main/soft-432hz.ogg" type="audio/ogg">
+  </audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
