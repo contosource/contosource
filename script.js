@@ -1,103 +1,169 @@
-// ContoSource minimal Presence Gate (no external audio files)
-// 3-10s empty-state entry with a synthesized warm tone (432Hz-ish)
+/* ContoSource — Presence Gate (Midnight Blue & Purple)
+   - Entrance sequencing (3-10s)
+   - WebAudio synthesized warm tone (432-ish)
+   - No external files
+   - Accessible, minimal
+*/
 
 const cfg = {
-  timings: { orbAppear: 220, whisper: 1400, orbFloat: 2000, showHome: 9000 },
-  tone: { freq: 432, volume: 0.08, attack: 0.12, decay: 1.6 }
+  timings: { orbIn: 220, orbFloat: 1400, whisperIn: 1600, haloIn: 2200, showHome: 9000 },
+  tone: { baseFreq: 432, volume: 0.06, attack: 0.12, sustain: 1.2 }
 };
 
-// DOM
-const gate = document.getElementById('gate');
+/* DOM references */
 const orb = document.getElementById('orb');
+const halo = document.getElementById('halo');
 const whisper = document.getElementById('whisper');
 const enterBtn = document.getElementById('enterBtn');
+const supportBtn = document.getElementById('supportBtn');
+const gate = document.getElementById('gate');
 const home = document.getElementById('home');
-const startSession = document.getElementById('startSession');
-const support = document.getElementById('support');
+const beginSession = document.getElementById('beginSession');
+const donateLink = document.getElementById('donateLink');
 
-// WebAudio synth (simple sine + subtle detune for warmth)
-let audioCtx, master, osc, gainNode;
-function initTone(){
+/* WebAudio synth basics */
+let audioCtx = null;
+let masterGain = null;
+let oscMain = null;
+let oscDetune = null;
+let envGain = null;
+
+function initAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  master = audioCtx.createGain();
-  master.gain.value = cfg.tone.volume;
-  master.connect(audioCtx.destination);
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 1.0;
+  masterGain.connect(audioCtx.destination);
 
-  // Create two slightly detuned oscillators to warm the tone
-  osc = audioCtx.createOscillator();
-  const osc2 = audioCtx.createOscillator();
-  gainNode = audioCtx.createGain();
-  gainNode.gain.value = 0;
-  osc.type = 'sine';
-  osc.frequency.value = cfg.tone.freq;
-  osc.detune.value = 0;
-  osc2.type = 'sine';
-  osc2.frequency.value = cfg.tone.freq * 0.9995; // tiny detune
-  osc2.detune.value = -2;
-  osc.connect(gainNode);
-  osc2.connect(gainNode);
-  gainNode.connect(master);
+  // envelope node
+  envGain = audioCtx.createGain();
+  envGain.gain.value = 0;
+  envGain.connect(masterGain);
 
-  osc.start();
-  osc2.start();
-}
+  // main oscillator (sine)
+  oscMain = audioCtx.createOscillator();
+  oscMain.type = 'sine';
+  oscMain.frequency.setValueAtTime(cfg.tone.baseFreq, audioCtx.currentTime);
 
-// smooth envelope
-function playTone(duration = 1.6){
-  try{
-    initTone();
-    const now = audioCtx.currentTime;
-    gainNode.gain.cancelScheduledValues(now);
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(cfg.tone.volume, now + cfg.tone.attack);
-    gainNode.gain.linearRampToValueAtTime(0.0001, now + duration);
-  }catch(e){
-    // audio locked / autoplay blocked
+  // detuned companion oscillator for warmth
+  oscDetune = audioCtx.createOscillator();
+  oscDetune.type = 'sine';
+  oscDetune.frequency.setValueAtTime(cfg.tone.baseFreq * 0.9993, audioCtx.currentTime);
+
+  // connect
+  oscMain.connect(envGain);
+  oscDetune.connect(envGain);
+
+  // start oscillators
+  try {
+    oscMain.start();
+    oscDetune.start();
+  } catch (e) {
+    // ignore if already started
   }
 }
 
-// Entrance sequence
-function openGate(){
-  // orb appears
-  setTimeout(()=>{ orb.style.opacity = '1'; orb.style.transform = 'scale(1)'; orb.classList.add('float'); playTone(1.8); }, cfg.timings.orbAppear);
-  // whisper appears
-  setTimeout(()=>{ whisper.style.opacity = '1'; }, cfg.timings.whisper);
-  // show enter button slightly later
-  setTimeout(()=>{ enterBtn.style.opacity = '1'; enterBtn.style.transform = 'translateY(0)'; }, cfg.timings.orbFloat);
-  // auto show home after full experience
-  setTimeout(()=>{ showHome(); }, cfg.timings.showHome);
+/* play a short tone with envelope */
+function playPresenceTone(duration = cfg.tone.sustain) {
+  try {
+    initAudio();
+    const now = audioCtx.currentTime;
+    const v = cfg.tone.volume;
+    envGain.gain.cancelScheduledValues(now);
+    envGain.gain.setValueAtTime(0.0001, now);
+    envGain.gain.linearRampToValueAtTime(v, now + cfg.tone.attack);
+    envGain.gain.linearRampToValueAtTime(0.0002, now + duration);
+  } catch (err) {
+    // Autoplay blocked; will work after user gesture
+  }
 }
 
-// Show home (portal dissolve)
-function showHome(){
+/* visual sequence functions */
+function revealOrb() {
+  orb.style.opacity = '1';
+  orb.style.transform = 'scale(1)';
+}
+function floatOrb() {
+  orb.classList.add('floaty');
+  halo.style.opacity = '1';
+  halo.style.transform = 'scale(1)';
+}
+function revealWhisper() {
+  whisper.style.opacity = '1';
+  whisper.style.transform = 'translateY(0)';
+}
+function showHome() {
   gate.classList.add('hidden');
   home.classList.remove('hidden');
   home.setAttribute('aria-hidden','false');
 }
 
-// Safety: ensure audio plays after first user gesture if blocked
-document.body.addEventListener('click', function once(){
-  if (!audioCtx) initTone();
+/* master sequence (runs on load) */
+function runSequence() {
+  // Orb in
+  setTimeout(() => {
+    revealOrb();
+    playPresenceTone(1.6);
+  }, cfg.timings.orbIn);
+
+  // Orb float + halo
+  setTimeout(() => {
+    floatOrb();
+  }, cfg.timings.orbFloat);
+
+  // Whisper appear
+  setTimeout(() => {
+    revealWhisper();
+  }, cfg.timings.whisperIn);
+
+  // halo accent
+  setTimeout(() => {
+    playPresenceTone(1.2);
+  }, cfg.timings.haloIn);
+
+  // finish -> home
+  setTimeout(() => {
+    showHome();
+  }, cfg.timings.showHome);
+}
+
+/* Safe audio start on first user gesture (browsers often block autoplay) */
+document.body.addEventListener('pointerdown', function one() {
+  if (!audioCtx) initAudio();
+  // optional gentle tone when user taps
+  try { playPresenceTone(0.7); } catch(e){}
 }, { once: true, passive: true });
 
-// button interactions
-enterBtn.addEventListener('click', ()=>{ showHome(); try{ playTone(1.2);}catch(e){} });
-
-// start session (placeholder - later we can implement)
-startSession.addEventListener('click', ()=>{ alert('Begin Alignment — guided experience coming soon.'); });
-
-// support link (replace href dynamically if you have gumroad/paypal)
-support.addEventListener('click', (e)=>{ 
-  e.preventDefault();
-  // replace with your payment link
-  const payLink = prompt('Paste your Pay link (PayPal.Me / Gumroad / BuyMeACoffee) or press OK to open placeholder.');
-  if(payLink){ window.open(payLink, '_blank'); }
+/* Buttons */
+enterBtn.addEventListener('click', () => {
+  try { playPresenceTone(1.0); } catch(e){}
+  showHome();
 });
 
-// initialize with minimal style values
-orb.style.opacity = 0; orb.style.transform = 'scale(.5)';
-enterBtn.style.opacity = 0; enterBtn.style.transform = 'translateY(10px)';
+supportBtn.addEventListener('click', () => {
+  // placeholder: replace with your actual payment / gumroad / paypal link when ready.
+  const p = prompt('Paste your support URL (Gumroad / PayPal.Me / BuyMeACoffee). Or press Cancel.');
+  if (p) {
+    window.open(p, '_blank', 'noopener');
+  }
+});
 
-// start
-openGate();
+beginSession.addEventListener('click', () => {
+  alert('Begin Alignment — guided experience coming soon. Thank you for being here.');
+});
+
+/* donate link placeholder */
+donateLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  const p = prompt('Paste your payment/support link (Gumroad/PayPal).');
+  if (p) window.open(p, '_blank', 'noopener');
+});
+
+/* init visuals (initial state) */
+orb.style.opacity = 0; orb.style.transform = 'scale(.6)'; halo.style.opacity = 0; halo.style.transform = 'scale(.85)'; whisper.style.opacity = 0; whisper.style.transform = 'translateY(8px)';
+
+/* Kick the sequence after minimal delay to ensure DOM readiness */
+window.addEventListener('load', () => {
+  setTimeout(runSequence, 140);
+});
+
