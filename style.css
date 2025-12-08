@@ -1,53 +1,66 @@
+/* ContoSource — Midnight Blue & Purple theme
+   Minimalist, accessible, responsive.
+*/
+
 :root{
-  --bg:#040404;
-  --soft:#fff7ea;
-  --muted: rgba(255,255,255,0.12);
+  --bg1: #020418;    /* deepest blue */
+  --bg2: #0b1336;    /* deep midnight */
+  --accent1: #8b6bff; /* purple */
+  --accent2: #5be1ff; /* cool cyan highlight */
+  --soft: #f6f4ff;   /* soft near-white */
+  --muted: rgba(246,244,255,0.18);
   --glass: rgba(255,255,255,0.03);
-  --accent: #ffd98c;
-  --max-w: 980px;
-  font-synthesis: none;
+  --maxw: 980px;
+  --radius: 999px;
+  --shadow: 0 10px 40px rgba(5,4,20,0.6);
 }
+
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--soft);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
-.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--soft);font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:28px;flex-direction:column;text-align:center;}
 .hidden{display:none!important;visibility:hidden}
-#gate{background:radial-gradient(ellipse at center, rgba(255,240,200,0.02) 0%, rgba(0,0,0,0) 40%)}
-#orb{
-  width:120px;height:120px;border-radius:999px;
-  background:radial-gradient(circle at 30% 30%, rgba(255,245,212,0.95), rgba(255,225,150,0.22));
-  filter:blur(18px);
-  box-shadow:0 10px 60px rgba(255,190,80,0.06), 0 2px 20px rgba(0,0,0,0.4);
-  transform:scale(.5);
-  opacity:0;
-  transition:transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms ease;
+
+/* FIELD - orb + halo */
+.field{position:relative;width:360px;height:360px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;pointer-events:none;}
+.orb{
+  width:130px;height:130px;border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, rgba(139,107,255,0.95), rgba(86,40,200,0.15) 45%, rgba(30,10,80,0.02) 70%);
+  filter: blur(14px);
+  opacity:0; transform: scale(0.6);
+  box-shadow: 0 20px 80px rgba(72,40,120,0.22), 0 6px 40px rgba(10,6,30,0.6);
+  transition: transform 900ms cubic-bezier(.2,.9,.2,1), opacity 900ms ease;
+}
+.halo{
+  position:absolute; width:320px;height:320px;border-radius:50%;
+  background: radial-gradient(circle at 50% 45%, rgba(139,107,255,0.06), rgba(91,225,255,0.02) 40%, transparent 60%);
+  opacity:0; transform: scale(.85); transition: opacity 1200ms ease, transform 1200ms ease;
+  filter: blur(22px);
 }
 
-/* subtle slow micro motion */
-@keyframes floaty { 0%{ transform: translateY(0) } 50%{ transform: translateY(-8px) } 100%{ transform: translateY(0) } }
-#orb.float { animation: floaty 6000ms ease-in-out infinite; }
+/* whisper lines */
+.whisper{opacity:0; transform: translateY(8px); transition: opacity 900ms ease, transform 900ms ease; margin-bottom:18px;}
+.whisper .line{font-size:1.3rem; letter-spacing:0.10em; color:var(--soft); margin:6px 0; text-shadow: 0 6px 20px rgba(2,0,10,0.6);}
 
-#whisper{margin-top:28px;text-align:center;opacity:0;transition:opacity 900ms ease}
-#whisper .line{font-size:1.45rem;letter-spacing:0.12em;margin:6px 0;color:var(--soft);opacity:.96}
+/* Controls (Enter, Support) */
+.controls{display:flex;gap:14px;align-items:center;justify-content:center;margin-top:10px}
+.btn{border:0;padding:12px 18px;border-radius:12px;background:linear-gradient(90deg, rgba(139,107,255,0.12), rgba(91,225,255,0.04)); color:var(--soft);cursor:pointer;font-weight:600;backdrop-filter: blur(6px);box-shadow: var(--shadow);}
+.btn:hover{transform:translateY(-2px);transition:transform 160ms ease}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 16px;border-radius:999px}
+.btn.subtle{background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); padding:10px 14px}
 
-/* Enter button (subtle, small) */
-.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 16px;border-radius:999px;color:var(--soft);font-weight:600;margin-top:36px;cursor:pointer}
-.ghost:hover{border-color:rgba(255,255,255,0.12)}
-.btn{background:linear-gradient(90deg,#ffefd3,#ffd98c);color:#111;padding:12px 20px;border-radius:999px;border:none;font-weight:700;cursor:pointer;margin:6px}
-.actions{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:24px}
+/* HOME */
+.home-inner{max-width:var(--maxw);padding:18px;text-align:center}
+.brand{font-size:36px;letter-spacing:0.16em;margin:6px 0}
+.sub{opacity:.82;margin-top:8px}
+.actions{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:22px}
+.note{opacity:.6;margin-top:22px;font-size:.95rem}
 
-/* HOME minimal */
-.home-inner{max-width:var(--max-w);text-align:center;padding:24px}
-.home-inner h1{font-size:34px;letter-spacing:0.18em;margin:6px 0}
-.sub{opacity:.78;margin-top:8px}
-
-/* footer small */
-.small{opacity:.6;margin-top:24px;font-size:13px}
-
-/* responsive */
+/* small screens */
 @media (max-width:520px){
-  #orb{width:84px;height:84px}
-  #whisper .line{font-size:1.05rem}
-  .home-inner h1{font-size:26px}
+  .field{width:220px;height:220px}
+  .orb{width:84px;height:84px}
+  .halo{width:210px;height:210px}
+  .whisper .line{font-size:1.05rem}
+  .brand{font-size:26px}
+  .btn{padding:10px 14px}
 }
-
-
