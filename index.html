@@ -4,39 +4,45 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ContoSource — Connection to Source</title>
-  <meta name="description" content="ContoSource — a minimalist portal to feel connected to Source. Breathe. Return. Remember." />
+  <meta name="description" content="ContoSource — a minimalist portal to align with Source. Breathe. Return. Remember." />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
+  <div id="app" aria-live="polite">
     <!-- PRESENCE GATE -->
-    <section id="gate" class="screen">
-      <div id="orb" aria-hidden="true"></div>
-      <div id="whisper" aria-hidden="true">
-        <div class="line">Be here.</div>
-        <div class="line">You are held.</div>
+    <main id="gate" class="screen" role="application" aria-label="ContoSource presence gateway">
+      <div id="field" class="field" role="presentation" aria-hidden="true">
+        <div id="orb" class="orb" aria-hidden="true"></div>
+        <div id="halo" class="halo" aria-hidden="true"></div>
       </div>
-      <button id="enterBtn" class="ghost" aria-label="Enter ContoSource">Enter</button>
-    </section>
 
-    <!-- HOME (after gate) -->
-    <section id="home" class="screen hidden" aria-hidden="true">
-      <header class="home-inner">
-        <h1>ContoSource</h1>
-        <p class="sub">A minimalist portal to align with Source — breathe, return, remember.</p>
+      <div id="whisper" class="whisper" aria-hidden="true">
+        <div class="line">Be still.</div>
+        <div class="line">You are connected.</div>
+      </div>
+
+      <div class="controls">
+        <button id="enterBtn" class="btn ghost" aria-label="Enter ContoSource">Enter</button>
+        <button id="supportBtn" class="btn subtle" aria-label="Support ContoSource">Support</button>
+      </div>
+    </main>
+
+    <!-- HOME LANDING (after gate) -->
+    <section id="home" class="screen hidden" role="main" aria-hidden="true">
+      <div class="home-inner">
+        <h1 class="brand">ContoSource</h1>
+        <p class="sub">A quiet portal to the Source — breathe. return. remember.</p>
 
         <div class="actions">
-          <a id="startSession" class="btn">Begin Alignment</a>
-          <a id="support" class="btn ghost" href="#" target="_blank" rel="noopener">Support (Pay)</a>
+          <button id="beginSession" class="btn">Begin Alignment</button>
+          <a id="donateLink" class="btn ghost" href="#" target="_blank" rel="noopener">Support / Donate</a>
         </div>
 
-        <footer class="small">
-          <p>Made with intention · © ContoSource</p>
-        </footer>
-      </header>
+        <p class="note">Small, consistent offerings sustain this work. Thank you.</p>
+      </div>
     </section>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
